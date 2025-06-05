@@ -124,7 +124,6 @@ func marshalToJSONString(v interface{}) string {
 }
 
 func main() {
-	// Load local .env for testing; in Cloud Run, env vars are provided by the service config.
 	_ = godotenv.Load()
 
 	projectID := os.Getenv("GCP_PROJECT_ID")
