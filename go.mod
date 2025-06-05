@@ -1,18 +1,19 @@
 module github.com/phaserunner03/logging
-
 go 1.24.3
 
 require (
+	cloud.google.com/go/bigquery v1.69.0
 	cloud.google.com/go/logging v1.13.0
 	github.com/joho/godotenv v1.5.1
 	google.golang.org/api v0.235.0
+	google.golang.org/genproto v0.0.0-20250528174236-200df99c418a
+	google.golang.org/protobuf v1.36.6
 )
 
 require (
 	cloud.google.com/go v0.121.2 // indirect
 	cloud.google.com/go/auth v0.16.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
-	cloud.google.com/go/bigquery v1.69.0 // indirect
 	cloud.google.com/go/compute/metadata v0.7.0 // indirect
 	cloud.google.com/go/iam v1.5.2 // indirect
 	cloud.google.com/go/longrunning v0.6.7 // indirect
@@ -47,9 +48,7 @@ require (
 	golang.org/x/time v0.11.0 // indirect
 	golang.org/x/tools v0.30.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
-	google.golang.org/genproto v0.0.0-20250528174236-200df99c418a // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250528174236-200df99c418a // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250528174236-200df99c418a // indirect
 	google.golang.org/grpc v1.72.2 // indirect
-	google.golang.org/protobuf v1.36.6 // indirect
 )
