@@ -1,0 +1,15 @@
+[
+    {"name": "timestamp", "type": "TIMESTAMP", "mode": "REQUIRED"},
+    {"name": "severity", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "log_name", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "text_payload", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "json_payload", "type": "JSON", "mode": "NULLABLE"},
+    {"name": "insert_id", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "resource_type", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "resource_labels", "type": "JSON", "mode": "NULLABLE"},
+    {"name": "http_request", "type": "JSON", "mode": "NULLABLE"},
+    {"name": "trace", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "span_id", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "source_location", "type": "JSON", "mode": "NULLABLE"},
+    {"name": "labels", "type": "JSON", "mode": "NULLABLE"}
+]
