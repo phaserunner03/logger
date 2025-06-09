@@ -5,41 +5,11 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
-
-	"github.com/joho/godotenv"
+	"github.com/phaserunner03/logging/configs"
 	"github.com/phaserunner03/logging/internal/bigquery"
 	"github.com/phaserunner03/logging/internal/logs"
 )
 
-func init() {
-	if err := loadEnvironment(); err != nil {
-		log.Fatalf("Failed to initialize environment: %v", err)
-	}
-}
-
-func loadEnvironment() error {
-	if err := godotenv.Load(); err != nil {
-		return fmt.Errorf("error loading .env file: %v", err)
-	}
-	return validateEnvironment()
-}
-
-func validateEnvironment() error {
-	required := []string{
-		"GCP_CREDENTIALS",
-		"GCP_PROJECT_ID",
-		"BIGQUERY_DATASET_ID",
-		"BIGQUERY_TABLE_ID",
-	}
-
-	for _, env := range required {
-		if os.Getenv(env) == "" {
-			return fmt.Errorf("required environment variable %s is not set", env)
-		}
-	}
-	return nil
-}
 
 func processLogs(ctx context.Context, services []string, startDate, endDate string) error {
 	// Fetch logs from Cloud Logging
@@ -84,10 +54,16 @@ func processLogs(ctx context.Context, services []string, startDate, endDate stri
 
 func main() {
 	ctx := context.Background()
+	config, err := configs.LoadConfig()
+	if err != nil {
+		log.Fatalf("Error loading configuration: %v", err)
+	}
 
-	services := []string{"loggenerator"} // Replace with actual service names
-	startDate := "2025-06-01T00:00:00Z"                      // Example start date
-	endDate := "2025-06-05T23:59:59Z"                        // Example end date
+	fmt.Println(config.Services.Name)
+
+	services := config.Services.Name    // Replace with actual service names
+	startDate := "2025-06-01T00:00:00Z" // Example start date
+	endDate := "2025-06-05T23:59:59Z"   // Example end date
 
 	if err := processLogs(ctx, services, startDate, endDate); err != nil {
 		log.Fatalf("Error processing logs: %v", err)
