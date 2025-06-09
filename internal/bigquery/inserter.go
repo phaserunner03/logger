@@ -24,6 +24,7 @@ type BQLogRow struct {
 	SpanID         string    `bigquery:"span_id"`         // NULLABLE
 	SourceLocation string    `bigquery:"source_location"` // NULLABLE (JSON type)
 	Labels         string    `bigquery:"labels"`          // NULLABLE (JSON type)
+	ServiceName    string    `bigquery:"service_name"`    // NULLABLE // Added service name field
 }
 
 // InsertLogs inserts log entries into BigQuery
