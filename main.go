@@ -41,9 +41,9 @@ func validateEnvironment() error {
 	return nil
 }
 
-func processLogs(ctx context.Context) error {
+func processLogs(ctx context.Context, services []string, startDate, endDate string) error {
 	// Fetch logs from Cloud Logging
-	entries, err := logs.FetchLogs(ctx)
+	entries, err := logs.FetchLogs(ctx, services, startDate, endDate)
 	if err != nil {
 		return fmt.Errorf("failed to fetch logs: %v", err)
 	}
@@ -65,6 +65,7 @@ func processLogs(ctx context.Context) error {
 			conversionErrors++
 			continue
 		}
+		row.ServiceName = entry.GetResource().GetLabels()["service_name"] // Add service name to row
 		bqRows = append(bqRows, row)
 	}
 
@@ -84,7 +85,11 @@ func processLogs(ctx context.Context) error {
 func main() {
 	ctx := context.Background()
 
-	if err := processLogs(ctx); err != nil {
+	services := []string{"loggenerator"} // Replace with actual service names
+	startDate := "2025-06-01T00:00:00Z"                      // Example start date
+	endDate := "2025-06-05T23:59:59Z"                        // Example end date
+
+	if err := processLogs(ctx, services, startDate, endDate); err != nil {
 		log.Fatalf("Error processing logs: %v", err)
 	}
 }
