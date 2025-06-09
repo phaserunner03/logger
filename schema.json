@@ -11,5 +11,6 @@
     {"name": "trace", "type": "STRING", "mode": "NULLABLE"},
     {"name": "span_id", "type": "STRING", "mode": "NULLABLE"},
     {"name": "source_location", "type": "JSON", "mode": "NULLABLE"},
-    {"name": "labels", "type": "JSON", "mode": "NULLABLE"}
+    {"name": "labels", "type": "JSON", "mode": "NULLABLE"},
+    {"name": "service_name", "type": "STRING", "mode": "NULLABLE"}
 ]
