@@ -1,0 +1,10 @@
+service: 
+  name: ['loggenerator']
+
+timestamp:
+  start: "2025-06-01T00:00:00Z"
+  end: "2025-06-05T23:59:59Z"
+
+resource:
+  type: ['cloud_run_revision']
+
