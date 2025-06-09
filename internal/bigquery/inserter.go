@@ -3,9 +3,9 @@ package bigquery
 import (
 	"context"
 	"fmt"
-	"os"
+	"log"
 	"time"
-
+	"github.com/phaserunner03/logging/configs"
 	"cloud.google.com/go/bigquery"
 	"google.golang.org/api/option"
 )
@@ -33,10 +33,15 @@ func InsertLogs(ctx context.Context, rows []BQLogRow) error {
 		return nil
 	}
 
-	projectID := os.Getenv("GCP_PROJECT_ID")
-	credentialsPath := os.Getenv("GCP_CREDENTIALS")
-	datasetID := os.Getenv("BIGQUERY_DATASET_ID")
-	tableID := os.Getenv("BIGQUERY_TABLE_ID")
+	
+	config, err := configs.LoadConfig()
+	if err != nil {
+		log.Fatalf("Error loading configuration: %v", err)
+	}
+	projectID := config.Env.GCP_ProjectID
+	credentialsPath := config.Env.GCP_Credentials
+	datasetID := config.Env.BigQueryDatasetID
+	tableID := config.Env.BigQueryTableID
 
 	if projectID == "" || credentialsPath == "" || datasetID == "" || tableID == "" {
 		return fmt.Errorf("required environment variables are not set")
