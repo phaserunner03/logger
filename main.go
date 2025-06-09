@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"github.com/phaserunner03/logging/configs"
+	"github.com/phaserunner03/logging/internal/analysis"
 	"github.com/phaserunner03/logging/internal/bigquery"
 	"github.com/phaserunner03/logging/internal/logs"
 )
@@ -24,7 +25,7 @@ func processLogs(ctx context.Context, services []string, startDate, endDate stri
 	}
 
 	// Pre-allocate slice with exact capacity needed
-	bqRows := make([]bigquery.BQLogRow, 0, len(entries))
+	bqRows := make([]configs.BQLogRow, 0, len(entries))
 	var conversionErrors int
 
 	// Convert log entries to BigQuery rows in batch
@@ -42,7 +43,10 @@ func processLogs(ctx context.Context, services []string, startDate, endDate stri
 	if len(bqRows) == 0 {
 		return fmt.Errorf("all %d log entries failed to convert", len(entries))
 	}
-
+	//if error in bqRows after analysing all entries, publish message to Pub/Sub
+	if err := analysis.HandleError(ctx, bqRows); err != nil {
+		return fmt.Errorf("failed to handle errors: %v", err)
+	}
 	// Insert all rows into BigQuery in a single batch
 	if err := bigquery.InsertLogs(ctx, bqRows); err != nil {
 		return fmt.Errorf("failed to insert logs into BigQuery: %v", err)

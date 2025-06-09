@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-
-	"github.com/phaserunner03/logging/internal/bigquery"
+	"github.com/phaserunner03/logging/configs"
 	logpb "google.golang.org/genproto/googleapis/logging/v2"
 	logtypepb "google.golang.org/genproto/googleapis/logging/type"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -77,12 +76,12 @@ func marshalToJSONString(v interface{}) string {
 	return string(data)
 }
 
-func ConvertToBQRow(entry *logpb.LogEntry) (bigquery.BQLogRow, error) {
+func ConvertToBQRow(entry *logpb.LogEntry) (configs.BQLogRow, error) {
 	if entry == nil {
-		return bigquery.BQLogRow{}, fmt.Errorf("nil log entry")
+		return configs.BQLogRow{}, fmt.Errorf("nil log entry")
 	}
 
-	return bigquery.BQLogRow{
+	return configs.BQLogRow{
 		Timestamp:      entry.GetTimestamp().AsTime(),
 		Severity:       entry.GetSeverity().String(),
 		LogName:        entry.GetLogName(),
