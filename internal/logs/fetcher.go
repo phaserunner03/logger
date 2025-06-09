@@ -3,10 +3,8 @@ package logs
 import (
 	"context"
 	"fmt"
-	"os"
-
-	"github.com/joho/godotenv"
-
+	"log"
+	"github.com/phaserunner03/logging/configs"
 	logging "cloud.google.com/go/logging/apiv2"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
@@ -14,9 +12,16 @@ import (
 )
 
 func FetchLogs(ctx context.Context, services []string, startDate, endDate string) ([]*logpb.LogEntry, error) {
-	_ = godotenv.Load()
-	credentials := os.Getenv("GCP_CREDENTIALS")
-	projectID := os.Getenv("GCP_PROJECT_ID")
+	
+	config, err := configs.LoadConfig()
+	
+	if err != nil {
+		log.Fatalf("Error loading configuration: %v", err)
+	}
+	credentials := config.Env.GCP_Credentials
+	projectID := config.Env.GCP_ProjectID
+
+
 
 	if credentials == "" || projectID == "" {
 		return nil, fmt.Errorf("GCP_CREDENTIALS and GCP_PROJECT_ID environment variables must be set")
