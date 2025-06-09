@@ -1,4 +1,5 @@
 module github.com/phaserunner03/logging
+
 go 1.24.3
 
 require (
@@ -8,6 +9,7 @@ require (
 	google.golang.org/api v0.235.0
 	google.golang.org/genproto v0.0.0-20250528174236-200df99c418a
 	google.golang.org/protobuf v1.36.6
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
