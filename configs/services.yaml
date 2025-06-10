@@ -1,5 +1,6 @@
 service: 
   name: ['loggenerator']
+  port: 8080
 
 timestamp:
   start: "2025-06-01T00:00:00Z"

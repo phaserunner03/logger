@@ -5,10 +5,13 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
+
 	"github.com/phaserunner03/logging/configs"
 	"github.com/phaserunner03/logging/internal/analysis"
 	"github.com/phaserunner03/logging/internal/bigquery"
 	"github.com/phaserunner03/logging/internal/logs"
+	"github.com/phaserunner03/logging/internal/router"
 )
 
 
@@ -57,19 +60,33 @@ func processLogs(ctx context.Context, services []string, startDate, endDate stri
 }
 
 func main() {
-	ctx := context.Background()
+
+
+	// ctx := context.Background()
+	// config, err := configs.LoadConfig()
+	// if err != nil {
+	// 	log.Fatalf("Error loading configuration: %v", err)
+	// }
+
+	// fmt.Println(config.Services.Name)
+
+	// services := config.Services.Name    
+	// startDate := "2025-06-01T00:00:00Z" 
+	// endDate := "2025-06-05T23:59:59Z"   
+
+	// if err := processLogs(ctx, services, startDate, endDate); err != nil {
+	// 	log.Fatalf("Error processing logs: %v", err)
+	// }
+
+	r:= router.Router()
 	config, err := configs.LoadConfig()
 	if err != nil {
 		log.Fatalf("Error loading configuration: %v", err)
 	}
-
-	fmt.Println(config.Services.Name)
-
-	services := config.Services.Name    // Replace with actual service names
-	startDate := "2025-06-01T00:00:00Z" // Example start date
-	endDate := "2025-06-05T23:59:59Z"   // Example end date
-
-	if err := processLogs(ctx, services, startDate, endDate); err != nil {
-		log.Fatalf("Error processing logs: %v", err)
+	port := config.Services.Port
+	log.Printf("Starting server on port %d", port)
+	if err := http.ListenAndServe(":"+fmt.Sprintf("%d", port), r); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
 	}
+
 }

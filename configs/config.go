@@ -11,6 +11,7 @@ import (
 type Config struct {
 	Services struct {
 		Name []string `yaml:"name"`
+		Port int      `yaml:"port"`
 	} `yaml:"service"`
 
 	Env struct {

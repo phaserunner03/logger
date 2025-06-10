@@ -6,7 +6,8 @@ require (
 	cloud.google.com/go/bigquery v1.69.0
 	cloud.google.com/go/logging v1.13.0
 	cloud.google.com/go/pubsub v1.49.0
-	github.com/googleapis/enterprise-certificate-proxy v0.3.6
+	github.com/go-chi/chi/v5 v5.2.1
+	github.com/go-chi/cors v1.2.1
 	github.com/joho/godotenv v1.5.1
 	google.golang.org/api v0.235.0
 	google.golang.org/genproto v0.0.0-20250528174236-200df99c418a
@@ -29,6 +30,7 @@ require (
 	github.com/google/flatbuffers v23.5.26+incompatible // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.2 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
