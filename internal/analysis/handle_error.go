@@ -41,11 +41,19 @@ func HandleError(ctx context.Context, bqRows []configs.BQLogRow) error {
 	}
 	defer topic.Stop()
 
-	for _, row := range errorLogs {
+	for _, row := range bqRows {
+		switch row.Severity {
+		case "ERROR", "PANIC", "WARNING":
+			// allowed
+		default:
+			continue
+		}
+
 		data, err := json.Marshal(row)
 		if err != nil {
 			return fmt.Errorf("failed to marshal row to JSON: %v", err)
 		}
+		//send only error
 		msg := &pubsub.Message{
 			Data: data,
 			Attributes: map[string]string{
