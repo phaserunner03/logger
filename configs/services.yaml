@@ -1,5 +1,5 @@
 service: 
-  name: ['loggenerator']
+  name: ['error-demo-service']
 
 timestamp:
   start: "2025-06-01T00:00:00Z"
