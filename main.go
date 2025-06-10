@@ -9,6 +9,8 @@ import (
 	"github.com/phaserunner03/logging/internal/analysis"
 	"github.com/phaserunner03/logging/internal/bigquery"
 	"github.com/phaserunner03/logging/internal/logs"
+	"github.com/robfig/cron/v3" 
+	"time"
 )
 
 
@@ -66,10 +68,20 @@ func main() {
 	fmt.Println(config.Services.Name)
 
 	services := config.Services.Name    // Replace with actual service names
-	startDate := "2025-06-01T00:00:00Z" // Example start date
-	endDate := "2025-06-05T23:59:59Z"   // Example end date
 
-	if err := processLogs(ctx, services, startDate, endDate); err != nil {
-		log.Fatalf("Error processing logs: %v", err)
-	}
+	c := cron.New(cron.WithLocation(time.UTC))
+
+	c.AddFunc("* * * * *", func() {
+		end := time.Now().UTC()
+		start := end.Add(-1 * time.Minute)
+		startDate := start.Format(time.RFC3339)
+		endDate := end.Format(time.RFC3339)
+	
+		log.Printf("Starting log processing from %s to %s", startDate, endDate)
+		if err := processLogs(ctx, services, startDate, endDate); err != nil {
+			log.Printf("Error: %v", err)
+		}
+	})
+	c.Start()
+	select {}
 }
