@@ -35,6 +35,7 @@ func HandleError(ctx context.Context, bqRows []configs.BQLogRow) error {
 		if err != nil {
 			return fmt.Errorf("failed to marshal row to JSON: %v", err)
 		}
+		//send only error
 		msg := &pubsub.Message{
 			Data: data,
 			Attributes: map[string]string{
