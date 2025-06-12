@@ -20,6 +20,7 @@ func Router() *chi.Mux {
 	}))
 
 	r.Get("/health", handler.HealthCheckHandler)
+	r.Post("/process-logs", handler.ProcessLogsHandler)
 
 	return r
 
