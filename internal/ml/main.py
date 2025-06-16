@@ -24,7 +24,7 @@ REGION = "us-central1"
 BIGQUERY_DATASET="logging"
 BIGQUERY_TABLE_ID="log_table"
 BATCH_SIZE = 5
-CODEBASE_PATH = "../../codebase"  
+CODEBASE_PATH = "../../codebase/buggy_app/src"  # Corrected path
 LOG_FILE_PATH = "../../codebase/buggy_app/backend/error_logs.txt"
 from dotenv import load_dotenv
 load_dotenv()
@@ -36,25 +36,38 @@ llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=1, max_tokens
 def load_codebase_as_docs():
     docs = []
     splitter = RecursiveCharacterTextSplitter(chunk_size=512, chunk_overlap=50)
+    print(f"[DEBUG] Walking through codebase path: {CODEBASE_PATH}")
     for root, _, files in os.walk(CODEBASE_PATH):
+        print(f"[DEBUG] Current directory: {root}, Files: {files}")
         for f in files:
+            file_path = os.path.join(root, f)
             try:
-                with open(LOG_FILE_PATH, "r", encoding="utf-8") as file:
+                print(f"[DEBUG] Processing file: {file_path}")
+                with open(file_path, "r", encoding="utf-8") as file:
                     text = file.read()
                     splits = splitter.split_text(text)
-                    docs.extend([Document(page_content=chunk, metadata={"filename": LOG_FILE_PATH}) for chunk in splits])
+                    docs.extend([Document(page_content=chunk, metadata={"filename": file_path}) for chunk in splits])
             except UnicodeDecodeError:
-                print(f"Skipping file {f} due to encoding issues.")
+                print(f"[WARNING] Skipping file {file_path} due to encoding issues.")
+            except Exception as e:
+                print(f"[ERROR] Failed to process file {file_path}: {e}")
     return docs
 
 print("[+] Indexing codebase...")
 code_docs = load_codebase_as_docs()
+if not code_docs:
+    raise ValueError("No documents were loaded from the codebase.")
+
+print(f"[+] Loaded {len(code_docs)} documents.")
 vectorstore = Chroma.from_documents(documents=code_docs, embedding=embeddings)
+if not vectorstore:
+    raise ValueError("Vectorstore creation failed due to empty embeddings.")
+
 retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 10})
 rag_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever, chain_type="stuff", return_source_documents=True)
-
+print("[+] Codebase indexed successfully.")
 # === Read logs from file and process ===
-@app.route("/process_logs", methods=["GET"])
+@app.route("/process", methods=["GET"])
 def process_logs():
     try:
         with open(LOG_FILE_PATH, "r") as f:
@@ -83,6 +96,17 @@ Based on the codebase, what is the fix? Provide only code."""
         return jsonify(results)
     except Exception as e:
         return jsonify({"status": "error", "error": str(e)}), 500
+
+# === Test retriever with a sample query ===
+print("[DEBUG] Testing retriever with a sample query...")
+sample_query = "How to handle errors in BuggyComponent?"
+retrieval_results = retriever.get_relevant_documents(sample_query)
+if retrieval_results:
+    print(f"[DEBUG] Retrieved {len(retrieval_results)} documents for the sample query.")
+    for doc in retrieval_results:
+        print(f"[DEBUG] Document metadata: {doc.metadata}, Content: {doc.page_content[:100]}...")
+else:
+    print("[DEBUG] No documents retrieved for the sample query.")
 
 if __name__ == "__main__":
     app.run(port=8080, debug=True)
