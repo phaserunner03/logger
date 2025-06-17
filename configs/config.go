@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"time"
+
 	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v2"
 )
@@ -18,8 +19,8 @@ type Config struct {
 		GCP_ProjectID     string
 		BigQueryDatasetID string
 		BigQueryTableID   string
-		TopicID			  string
-		
+		TopicID           string
+		SubID             string
 	}
 }
 
@@ -61,6 +62,7 @@ func LoadConfig() (*Config, error) {
 	config.Env.BigQueryDatasetID = os.Getenv("BIGQUERY_DATASET_ID")
 	config.Env.BigQueryTableID = os.Getenv("BIGQUERY_TABLE_ID")
 	config.Env.TopicID = os.Getenv("TOPIC_ID")
+	config.Env.SubID = os.Getenv("SUB_ID")
 
 	return &config, nil
 }
