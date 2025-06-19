@@ -21,6 +21,7 @@ type Config struct {
 		BigQueryTableID   string
 		TopicID           string
 		SubID             string
+		GithubToken       string
 	}
 }
 
@@ -63,6 +64,7 @@ func LoadConfig() (*Config, error) {
 	config.Env.BigQueryTableID = os.Getenv("BIGQUERY_TABLE_ID")
 	config.Env.TopicID = os.Getenv("TOPIC_ID")
 	config.Env.SubID = os.Getenv("SUB_ID")
+	config.Env.GithubToken=os.Getenv("GITHUB_TOKEN")
 
 	return &config, nil
 }
