@@ -6,6 +6,9 @@ function BuggyComponent() {
   const inputRef = useRef(null);
 
   useEffect(() => {
+    console.log("Age:", person?.age || "N/A");
+    if (inputRef.current) inputRef.current.value = 'Test';
+    setCount(prev => prev + 1);
     // Intentional: accessing property of null
     //console.log('User name:', user.name); // 💥 TypeError
     if (user) {
@@ -31,9 +34,9 @@ function BuggyComponent() {
   };
 
   const triggerRefError = () => {
-    //inputRef.current.value = 'Test'; // 💥
+    //if (inputRef.current) inputRef.current.value = 'Test'; // 💥
     if(inputRef.current){
-      inputRef.current.value = 'Test';
+      if (inputRef.current) inputRef.current.value = 'Test';
     } else {
       console.log("inputRef.current is null");
     }
@@ -41,7 +44,7 @@ function BuggyComponent() {
 
   const triggerStateBug = () => {
     setCount(prevCount => prevCount + 1); // Fixes the state update issue
-    //setCount(count++);
+    //setCount(prev => prev + 1);
     //console.log('Count (should not be stale):', count); // 💥
     setCount(prevCount => {
       console.log('Count (should not be stale):', prevCount + 1); // Log the next state
