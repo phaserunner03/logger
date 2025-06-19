@@ -7,7 +7,7 @@ function BuggyComponent() {
 
   useEffect(() => {
     console.log("Age:", person?.age || "N/A");
-    if (inputRef.current) if (inputRef.current) inputRef.current.value = 'Test';
+    if (inputRef.current) if (inputRef.current) if (inputRef.current) inputRef.current.value = 'Test';
     setCount(prev => prev + 1);
     // Intentional: accessing property of null
     //console.log('User name:', user.name); // 💥 TypeError
@@ -34,9 +34,9 @@ function BuggyComponent() {
   };
 
   const triggerRefError = () => {
-    //if (inputRef.current) if (inputRef.current) inputRef.current.value = 'Test'; // 💥
+    //if (inputRef.current) if (inputRef.current) if (inputRef.current) inputRef.current.value = 'Test'; // 💥
     if(inputRef.current){
-      if (inputRef.current) if (inputRef.current) inputRef.current.value = 'Test';
+      if (inputRef.current) if (inputRef.current) if (inputRef.current) inputRef.current.value = 'Test';
     } else {
       console.log("inputRef.current is null");
     }
