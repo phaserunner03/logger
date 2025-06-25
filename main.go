@@ -60,51 +60,54 @@ func processLogs(ctx context.Context, services []string, startDate, endDate stri
 	return nil
 }
 
+func main() {
+	ctx := context.Background()
+	config, err := configs.LoadConfig()
+	if err != nil {
+		log.Fatalf("Error loading configuration: %v", err)
+	}
+
+	fmt.Println(config.Services.Name)
+
+	services := config.Services.Name    // Replace with actual service names
+
+	c := cron.New(cron.WithLocation(time.UTC))
+
+	c.AddFunc("* * * * *", func() {
+		end := time.Now().UTC()
+		start := end.Add(-1 * time.Minute)
+		startDate := start.Format(time.RFC3339)
+		endDate := end.Format(time.RFC3339)
+
+		log.Printf("Starting log processing from %s to %s", startDate, endDate)
+		if err := processLogs(ctx, services, startDate, endDate); err != nil {
+			log.Printf("Error: %v", err)
+		}
+	})
+	c.Start()
+	select {}
+}
+
 // func main() {
-// 	ctx := context.Background()
 // 	config, err := configs.LoadConfig()
 // 	if err != nil {
 // 		log.Fatalf("Error loading configuration: %v", err)
 // 	}
-
-// 	fmt.Println(config.Services.Name)
-
-// 	services := config.Services.Name    // Replace with actual service names
-
-// 	c := cron.New(cron.WithLocation(time.UTC))
-
-// 	c.AddFunc("* * * * *", func() {
-// 		end := time.Now().UTC()
-// 		start := end.Add(-1 * time.Minute)
-// 		startDate := start.Format(time.RFC3339)
-// 		endDate := end.Format(time.RFC3339)
-
-// 		log.Printf("Starting log processing from %s to %s", startDate, endDate)
-// 		if err := processLogs(ctx, services, startDate, endDate); err != nil {
-// 			log.Printf("Error: %v", err)
-// 		}
+// 	err = githubconnector.CreatePR(githubconnector.PRConfig{
+// 		RepoOwner:     "phaserunner03",
+// 		RepoName:      "logger",
+// 		BaseBranch:    "dev",
+// 		NewBranch:     fmt.Sprintf("fix-branch-%d", time.Now().Unix()),
+// 		GithubToken:   config.Env.GithubToken,
+// 		LocalRepoPath: "/Users/bhavya.shah/Documents/Go/logger",
+// 		FixFilePath:   "/Users/bhavya.shah/Documents/Go/logger/buggy_app/src/components/BuggyComponent.jsx",
+// 		FixContent:    "",
+// 		CommitMessage: "Fix: auto generated",
+// 		PRTitle:       "Fix:auto generated",
+// 		PRBody:        "Fix:auto generated",
 // 	})
-// 	c.Start()
-// 	select {}
+
+// 	if err != nil {
+// 		fmt.Printf("PR creation failed: %v\n", err)
+// 	}
 // }
-
-func main() {
-	config, err := configs.LoadConfig()
-	err = githubconnector.CreatePR(githubconnector.PRConfig{
-		RepoOwner:     "phaserunner03",
-		RepoName:      "logger",
-		BaseBranch:    "dev",
-		NewBranch:     fmt.Sprintf("fix-branch-%d", time.Now().Unix()),
-		GithubToken:   config.Env.GithubToken,
-		LocalRepoPath: "/Users/bhavya.shah/Documents/Go/logger",
-		FixFilePath:   "/Users/bhavya.shah/Documents/Go/logger/buggy_app/src/components/BuggyComponent.jsx",
-		FixContent:    "",
-		CommitMessage: "Fix: auto generated",
-		PRTitle:       "Fix:auto generated",
-		PRBody:        "Fix:auto generated",
-	})
-
-	if err != nil {
-		fmt.Printf("PR creation failed: %v\n", err)
-	}
-}

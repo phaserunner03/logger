@@ -5,19 +5,20 @@ from retriever.rag_chain import rag_chain
 def analyze_logs():
     results = []
     logs = []
+    message_history= []
     with open(LOG_FILE_PATH, "r") as f:
         for line in f:
             logs.append(json.loads(line))
 
     for log_entry in logs:
         try:
-            print("Hello world")
             print(log_entry)
             print("Proceeding")
 
             timestamp = log_entry.get("timestamp")
             error_message = log_entry.get("text_payload")
 
+            
             prompt = f"""
                 The following is an error log from the application at {timestamp}:
 
