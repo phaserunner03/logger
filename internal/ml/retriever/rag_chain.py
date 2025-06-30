@@ -8,7 +8,6 @@ from codebase.processor import load_codebase_as_docs
 from config import LLM_MODEL
 
 PERSISTENT_VECTORSTORE_PATH = "./internal/data"
-
 llm = ChatGoogleGenerativeAI(model=LLM_MODEL, temperature=1, max_tokens=1000)
 code_docs = load_codebase_as_docs()
 
@@ -31,4 +30,3 @@ chain_type="stuff",
 return_source_documents=True
 )
 
-#what if there are mutliple changes in the multiple files 

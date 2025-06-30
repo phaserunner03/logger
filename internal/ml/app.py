@@ -11,7 +11,9 @@ app = Flask(__name__)
 
 @app.route("/suggest-fix",methods=["POST"])
 def suggest_fix():
-    results = analyze_logs()
+    log = request.json.get("error_message", None)
+    print(log)
+    results = analyze_logs(log)
     print("---------------------------")
 
     for idx,entry in enumerate(results):

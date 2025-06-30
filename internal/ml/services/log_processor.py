@@ -1,14 +1,11 @@
 import json
-from config import LOG_FILE_PATH
 from retriever.rag_chain import rag_chain
 
-def analyze_logs():
+def analyze_logs(log=None):
     results = []
-    logs = []
+    logs= []
+    logs.append(log)
     message_history= []
-    with open(LOG_FILE_PATH, "r") as f:
-        for line in f:
-            logs.append(json.loads(line))
     
     for idx,log_entry in enumerate(logs):
         try:
