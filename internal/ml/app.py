@@ -1,7 +1,8 @@
 from services.log_processor import analyze_logs
 from retriever.rag_chain import retriever
 from utils.parser import extract_code_block
-from utils.common import sanitize_filename
+from utils.io import save_code
+
 from flask import Flask,request,jsonify
 
 
@@ -15,15 +16,17 @@ def suggest_fix():
 
     for idx,entry in enumerate(results):
         code_response = entry.get("suggested_fix","").strip()
-        timestamp = sanitize_filename(entry.get("timestamp", f"fix_{idx}"))
-        code = extract_code_block(code_response)
+        filename = entry.get("affected_file", "unknown_file.js")
+       
+        code,file= extract_code_block(code_response)
         if not code:
-            print(f"⛔ Skipping entry #{idx+1}: No code found.")
-            continue        
-        return jsonify({
-        "timestamp": timestamp,
-        "suggested_fix": code
-    })
+            print(f"Skipping entry #{idx+1}: No code found.")
+            continue
+        print(file)
+        filename = filename.strip()
+        path = save_code(code, filename)
+        print(f"[✅] Saved: {path}")
+    return jsonify({"message": "Fix suggestions processed successfully"}), 200
 
     
 if __name__ == "__main__":

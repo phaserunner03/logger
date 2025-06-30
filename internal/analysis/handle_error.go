@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/phaserunner03/logging/configs"
 	"github.com/phaserunner03/logging/internal/prodsub"
 )
 
-// SuggestFix calls the Flask service to get suggested fix
 func SuggestFix(timestamp, errorMessage string) (string, error) {
 	payload := map[string]string{
 		"timestamp":     timestamp,
@@ -37,7 +37,7 @@ func SuggestFix(timestamp, errorMessage string) (string, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("Flask returned status %d: %s", resp.StatusCode, string(body))
+		return "", fmt.Errorf("flask returned status %d: %s", resp.StatusCode, string(body))
 	}
 
 	var parsed map[string]interface{}
@@ -80,42 +80,50 @@ func HandleError(ctx context.Context, bqRows []configs.BQLogRow) error {
 	}
 	defer publisher.Close()
 
-	for _, row := range bqRows {
+	for _, row := range errorLogs {
 		if err := publisher.PublishLog(ctx, row); err != nil {
 			return fmt.Errorf("failed to publish message: %v", err)
 		}
 	}
 
-	// Create a log queue with buffer
 	logQueue := make(chan configs.BQLogRow, 10)
+	var wg sync.WaitGroup
 
-	// Start a single worker to process logs serially
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		for row := range logQueue {
 			fmt.Printf("Received log from service %s with severity %s: %s\n",
 				row.ServiceName, row.Severity, row.TextPayload)
 
-			suggestion, err := SuggestFix(row.Timestamp.Format(time.RFC3339), row.TextPayload)
-			if err != nil {
-				fmt.Printf("failed to get suggestion: %v\n", err)
-				continue
-			}
+			// suggestion, err := SuggestFix(row.Timestamp.Format(time.RFC3339), row.TextPayload)
+			// if err != nil {
+				// fmt.Printf("failed to get suggestion: %v\n", err)
+				// continue
+			// }
 
-			fmt.Printf("✅ Suggested Fix:\n%s\n", suggestion)
+			// fmt.Printf("✅ Suggested Fix:\n%s\n", suggestion)
 		}
 	}()
 
+	// Create subscriber
 	subscriber, err := prodsub.NewSubscriber(ctx, GCP_ProjectID, subID, credentialsPath)
 	if err != nil {
 		return fmt.Errorf("failed to create Pub/Sub subscriber: %v", err)
 	}
 	defer subscriber.Close()
 
-	// Enqueue logs into the logQueue for serial processing
-	err = subscriber.Listen(ctx, func(row configs.BQLogRow) error {
+	// Use timeout to stop listening after a short idle period
+	timeoutCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	err = subscriber.Listen(timeoutCtx, func(row configs.BQLogRow) error {
 		logQueue <- row
 		return nil
 	})
+
+	close(logQueue)
+	wg.Wait()
 
 	return err
 }
@@ -123,6 +131,7 @@ func HandleError(ctx context.Context, bqRows []configs.BQLogRow) error {
 func parseErrorLogs(bqRows []configs.BQLogRow) ([]configs.BQLogRow, error) {
 	var errorLogs []configs.BQLogRow
 	for _, row := range bqRows {
+		fmt.Print(row)
 		if row.Severity == "ERROR" {
 			errorLogs = append(errorLogs, row)
 		}

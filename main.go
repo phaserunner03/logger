@@ -9,10 +9,10 @@ import (
 	"github.com/phaserunner03/logging/configs"
 	"github.com/phaserunner03/logging/internal/analysis"
 	"github.com/phaserunner03/logging/internal/bigquery"
-	githubconnector "github.com/phaserunner03/logging/internal/github"
+	// githubconnector "github.com/phaserunner03/logging/internal/github"
 	"github.com/phaserunner03/logging/internal/logs"
 
-	// "github.com/robfig/cron/v3"
+	"github.com/robfig/cron/v3"
 	"time"
 )
 
@@ -66,10 +66,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading configuration: %v", err)
 	}
+	services := config.Services.Name   
 
 	fmt.Println(config.Services.Name)
+	
 
-	services := config.Services.Name    // Replace with actual service names
 
 	c := cron.New(cron.WithLocation(time.UTC))
 

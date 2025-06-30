@@ -12,6 +12,7 @@ PERSISTENT_VECTORSTORE_PATH = "./internal/data"
 llm = ChatGoogleGenerativeAI(model=LLM_MODEL, temperature=1, max_tokens=1000)
 code_docs = load_codebase_as_docs()
 
+print("Vectorstore loaded and retriever created.")
 if os.path.exists(PERSISTENT_VECTORSTORE_PATH):
     vectorstore = Chroma(persist_directory=PERSISTENT_VECTORSTORE_PATH, embedding_function=embeddings)
 else:
@@ -20,14 +21,14 @@ else:
         embedding=embeddings,
         persist_directory=PERSISTENT_VECTORSTORE_PATH
     )
-    vectorstore.persist()
 
-retreiver = vectorstore.as_retriever(search_kwargs={"k": 10})    
 
+retriever = vectorstore.as_retriever(search_type="similarity",search_kwargs={"k": 10})    
 rag_chain = RetrievalQA.from_chain_type(
 llm=llm,
-retriever=retreiver,
+retriever=retriever,
 chain_type="stuff",
 return_source_documents=True
 )
 
+#what if there are mutliple changes in the multiple files 

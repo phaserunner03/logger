@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
+	"time"
 	"cloud.google.com/go/pubsub"
 	"github.com/phaserunner03/logging/configs"
 	"google.golang.org/api/option"
@@ -17,27 +17,26 @@ type Subscriber struct {
 	credPath string
 }
 
-func NewSubscriber(ctx context.Context,projectID,subscriptionID,credPath string) (*Subscriber,error){
-
-	client, err := pubsub.NewClient(ctx,projectID,option.WithCredentialsFile(credPath))
-	
-	if err!=nil{
-		return nil,fmt.Errorf("pubsub subscription not found %v",err)
+func NewSubscriber(ctx context.Context, projectID, subscriptionID, credPath string) (*Subscriber, error) {
+	client, err := pubsub.NewClient(ctx, projectID, option.WithCredentialsFile(credPath))
+	if err != nil {
+		return nil, fmt.Errorf("pubsub subscription not found: %v", err)
 	}
 
-	sub:= client.Subscription(subscriptionID)
+	sub := client.Subscription(subscriptionID)
 
-	if sub == nil{
-		return nil, fmt.Errorf("pubsub subscription not found %s",subscriptionID)
-	}
+	// Prevent endless streaming; make it timeout-able
+	sub.ReceiveSettings.MaxOutstandingMessages = 10
+	sub.ReceiveSettings.MaxExtension = 10 * time.Second
+
 	return &Subscriber{
-		client: client,
+		client:         client,
 		subscriptionID: subscriptionID,
-		subcription: sub,
-		credPath: credPath,
-	},nil
-
+		subcription:    sub,
+		credPath:       credPath,
+	}, nil
 }
+
 
 func (s *Subscriber) Listen(ctx context.Context, handler func(configs.BQLogRow) error) error {
 	
