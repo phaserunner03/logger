@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"os"
 	"time"
-
 	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v2"
 )
