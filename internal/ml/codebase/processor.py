@@ -2,8 +2,10 @@ import os
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document
 from config import CODEBASE_PATH
+from codebase.repo_loader import prepare_codebase
 
 def load_codebase_as_docs():
+    prepare_codebase()
     docs = []
     splitter = RecursiveCharacterTextSplitter(chunk_size=512, chunk_overlap=50)
     for root, _, files in os.walk(CODEBASE_PATH):
