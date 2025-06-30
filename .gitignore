@@ -2,3 +2,4 @@ key.json
 cloud_run_logs.txt
 .env
 node_modules/
+codebase/
