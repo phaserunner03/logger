@@ -21,8 +21,6 @@ func FetchLogs(ctx context.Context, services []string, startDate, endDate string
 	credentials := config.Env.GCP_Credentials
 	projectID := config.Env.GCP_ProjectID
 
-
-
 	if credentials == "" || projectID == "" {
 		return nil, fmt.Errorf("GCP_CREDENTIALS and GCP_PROJECT_ID environment variables must be set")
 	}

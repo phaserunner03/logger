@@ -1,5 +1,5 @@
 service: 
-  name: ['loggenerator']
+  name: ['logall']
 
 resource:
   type: ['cloud_run_revision']
