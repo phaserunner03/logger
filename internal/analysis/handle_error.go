@@ -98,8 +98,8 @@ func HandleError(ctx context.Context, bqRows []configs.BQLogRow) error {
 
 			// suggestion, err := SuggestFix(row.Timestamp.Format(time.RFC3339), row.TextPayload)
 			// if err != nil {
-				// fmt.Printf("failed to get suggestion: %v\n", err)
-				// continue
+			// 	fmt.Printf("failed to get suggestion: %v\n", err)
+			// 	continue
 			// }
 
 			// fmt.Printf("✅ Suggested Fix:\n%s\n", suggestion)
