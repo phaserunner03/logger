@@ -2,4 +2,5 @@ key.json
 cloud_run_logs.txt
 .env
 node_modules/
-codebase/
+internal/ml/internal/data/
+internal/ml/config.py
