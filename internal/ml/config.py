@@ -12,5 +12,5 @@ CODEBASE_PATH = os.getenv("CODE_BASE_PATH","./codebase")
 EMBEDDING_MODEL = "models/embedding-001"
 LLM_MODEL = "gemini-2.0-flash"
 PERSISTENT_VECTORSTORE_PATH = "./internal/data"
-VECTOR_SEARCH_THRESHOLD = 0.7  # e.g. 0.7
+VECTOR_SEARCH_THRESHOLD = 0.6  # e.g. 0.7
 TOP_K = 10  # e.g. 10

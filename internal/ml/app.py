@@ -39,10 +39,9 @@
 # app.py
 from services.log_processor import analyze_logs
 from retriever.rag_chain import retriever
-from utils.parser import extract_code_block
-from utils.io import save_code
 from retriever.enhancement_loop import EnhancementLoop
 from retriever.embedder import embeddings
+from utils.parser import parse_response
 
 from flask import Flask,request,jsonify
 from config import LLM_MODEL
@@ -52,49 +51,33 @@ app = Flask(__name__)
 
 
 # 1) Instantiate your LLM and EnhancementLoop once
-llm = ChatGoogleGenerativeAI(model=LLM_MODEL, temperature=1, max_tokens=1000)
+llm = ChatGoogleGenerativeAI(model=LLM_MODEL, temperature=1, max_tokens=3072)
 loop = EnhancementLoop(embedding_model=embeddings, llm=llm)
 
 @app.route("/suggest-fix", methods=["POST"])
 def suggest_fix():
-    # 2) Extract the error_message payload
     payload = request.json or {}
     error_message = payload.get("error_message", "")
     if not error_message:
         return jsonify({"error": "No `error_message` provided"}), 400
-
-    # 3) Run the enhancement loop
-    out = loop.run(error_message)
-
-    # 4) If there was an error or nothing passed the threshold, just return that
-    if out.get("error"):
-        return jsonify(out), 200
-
-    # 5) Otherwise, parse the suggestion, extract code, and save files exactly as before
-    suggestion = out["suggestion"]
-    # `extract_code_block` returns (code, filename_in_block) if the AI followed the format
-    code, file_from_block = extract_code_block(suggestion)
-
-    # Fallback: if the block didn’t parse, pick the first matched doc’s filename
-    if not code:
-        # take the first match from out["matched_docs"]
-        file_to_save = out["matched_docs"][0]["filename"]
-        code = suggestion
-    else:
-        file_to_save = file_from_block
-
-    # normalize and save
-    file_to_save = file_to_save.strip()
-    path = save_code(code, file_to_save)
-
-    # 6) Return a summary JSON
+    raw_text = loop.run(error_message)
+    print(f"Raw response from LLM: {raw_text}")
+    parsed = parse_response(raw_text)
+    filename = parsed["filename"].strip() if parsed.get("filename") else "unknown_file.js"
+    changes = parsed["changes"].strip() if parsed.get("changes") else ""
+    explanation= parsed["explanation"].strip() if parsed.get("explanation") else ""
+    if not explanation:
+        explanation = "Warning: LLM output might be incomplete due to token cutoff."
+    # print(parsed["explanation"])
+    # return jsonify("hello world"),200
     return jsonify({
-        "query":        out["query"],
-        "matched_docs": out["matched_docs"],
-        "saved_path":   path,
-        "explanation":  suggestion.split("\n")[-1]  # if you included a “**Explanation:**” line
+        "filename":filename,
+        "changes":changes,
+        "explanation": explanation,
+        "raw_text": raw_text,
     }), 200
 
+   
 
 
 @app.route("/health", methods=["GET"])
