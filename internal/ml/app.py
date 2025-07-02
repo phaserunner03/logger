@@ -68,8 +68,7 @@ def suggest_fix():
     explanation= parsed["explanation"].strip() if parsed.get("explanation") else ""
     if not explanation:
         explanation = "Warning: LLM output might be incomplete due to token cutoff."
-    # print(parsed["explanation"])
-    # return jsonify("hello world"),200
+    
     return jsonify({
         "filename":filename,
         "changes":changes,
