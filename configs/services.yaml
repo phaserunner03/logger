@@ -1,5 +1,6 @@
 service: 
   name: ['logall']
+  severity: ['ERROR']
 
 resource:
   type: ['cloud_run_revision']

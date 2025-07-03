@@ -9,16 +9,40 @@ import (
 	"github.com/phaserunner03/logging/configs"
 	"github.com/phaserunner03/logging/internal/analysis"
 	"github.com/phaserunner03/logging/internal/bigquery"
-	// githubconnector "github.com/phaserunner03/logging/internal/github"
+
 	"github.com/phaserunner03/logging/internal/logs"
 
 	"github.com/robfig/cron/v3"
 	"time"
 )
 
-func processLogs(ctx context.Context, services []string, startDate, endDate string) error {
+func processLogsFromFile(ctx context.Context, filePath string) error {
+
+	entries, err := logs.FetchLogsFromFile(ctx, filePath)
+	if err != nil {
+		return fmt.Errorf("failed to fetch logs from file: %v", err)
+	}
+
+	if len(entries) == 0 {
+		log.Println("No log entries to process")
+		return nil
+	}
+		
+	log.Println("📋 Showing sample logs (max 10):")
+	for i := 0; i < len(entries) && i < 10; i++ {
+		entry := entries[i]
+		log.Printf("[%d] Timestamp: %s | Function: %s | Message: %s\n",
+			i+1, entry.Timestamp.Format("2006-01-02 15:04:05"), entry.ServiceName, entry.JsonPayload)
+	}
+
+
+	fmt.Printf("successfully processed log entries from file")
+	return nil
+}
+
+func processLogsFromCloud(ctx context.Context, services []string, startDate, endDate string) error {
 	// Fetch logs from Cloud Logging
-	entries, err := logs.FetchLogs(ctx, services, startDate, endDate)
+	entries, err := logs.FetchLogsFromCloud(ctx, services, startDate, endDate)
 	if err != nil {
 		return fmt.Errorf("failed to fetch logs: %v", err)
 	}
@@ -27,7 +51,6 @@ func processLogs(ctx context.Context, services []string, startDate, endDate stri
 		log.Println("No log entries to process")
 		return nil
 	}
-
 	// Pre-allocate slice with exact capacity needed
 	bqRows := make([]configs.BQLogRow, 0, len(entries))
 	var conversionErrors int
@@ -66,49 +89,34 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading configuration: %v", err)
 	}
-	services := config.Services.Name   
+	services := config.Services.Name
 
-	fmt.Println(config.Services.Name)
-	
-
-
-	c := cron.New(cron.WithLocation(time.UTC))
-
-	c.AddFunc("* * * * *", func() {
-		end := time.Now().UTC()
-		start := end.Add(-1 * time.Minute)
-		startDate := start.Format(time.RFC3339)
-		endDate := end.Format(time.RFC3339)
-
-		log.Printf("Starting log processing from %s to %s", startDate, endDate)
-		if err := processLogs(ctx, services, startDate, endDate); err != nil {
-			log.Printf("Error: %v", err)
+	switch config.Env.LogFetchType {
+	case "file":
+		fmt.Printf("Fetching logs from file: %v\n", config.Services.Name)
+		err := processLogsFromFile(ctx, config.Env.LogFilePath)
+		if err != nil {
+			log.Fatalf("Error processing logs from file: %v", err)
 		}
-	})
-	c.Start()
-	select {}
+
+	case "cloud":
+		fmt.Printf("Fetching logs from cloud %v\n", config.Services.Name)
+		c := cron.New(cron.WithLocation(time.UTC))
+
+		c.AddFunc("* * * * *", func() {
+			end := time.Now().UTC()
+			start := end.Add(-1 * time.Minute)
+			startDate := start.Format(time.RFC3339)
+			endDate := end.Format(time.RFC3339)
+
+			log.Printf("Starting log processing from %s to %s", startDate, endDate)
+			if err := processLogsFromCloud(ctx, services, startDate, endDate); err != nil {
+				log.Printf("Error: %v", err)
+			}
+		})
+		c.Start()
+		select {}
+
+	}
+
 }
-
-// func main() {
-// 	config, err := configs.LoadConfig()
-// 	if err != nil {
-// 		log.Fatalf("Error loading configuration: %v", err)
-// 	}
-// 	err = githubconnector.CreatePR(githubconnector.PRConfig{
-// 		RepoOwner:     "phaserunner03",
-// 		RepoName:      "logger",
-// 		BaseBranch:    "dev",
-// 		NewBranch:     fmt.Sprintf("fix-branch-%d", time.Now().Unix()),
-// 		GithubToken:   config.Env.GithubToken,
-// 		LocalRepoPath: "/Users/bhavya.shah/Documents/Go/logger",
-// 		FixFilePath:   "/Users/bhavya.shah/Documents/Go/logger/buggy_app/src/components/BuggyComponent.jsx",
-// 		FixContent:    "",
-// 		CommitMessage: "Fix: auto generated",
-// 		PRTitle:       "Fix:auto generated",
-// 		PRBody:        "Fix:auto generated",
-// 	})
-
-// 	if err != nil {
-// 		fmt.Printf("PR creation failed: %v\n", err)
-// 	}
-// }

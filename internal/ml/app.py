@@ -60,25 +60,27 @@ def suggest_fix():
     error_message = payload.get("error_message", "")
     if not error_message:
         return jsonify({"error": "No `error_message` provided"}), 400
+
     raw_text = loop.run(error_message)
     print(f"Raw response from LLM: {raw_text}")
-    parsed = parse_response(raw_text)
-    filename = parsed["filename"].strip() if parsed.get("filename") else "unknown_file.js"
-    changes = parsed["changes"].strip() if parsed.get("changes") else ""
-    explanation= parsed["explanation"].strip() if parsed.get("explanation") else ""
-    if not explanation:
-        explanation = "Warning: LLM output might be incomplete due to token cutoff."
-    
+    print(f"Type of raw_text: {type(raw_text)}")
+
+    try:
+        parsed = parse_response(raw_text)
+    except Exception as e:
+        return jsonify({"error": f"Invalid LLM response: {str(e)}"}), 500
+
+    filename = parsed["filename"].strip() or "unknown_file.js"
+    changes = parsed["changes"].strip()
+    explanation = parsed["explanation"].strip() or "Warning: LLM output might be incomplete."
+
     return jsonify({
-        "filename":filename,
-        "changes":changes,
+        "filename": filename,
+        "changes": changes,
         "explanation": explanation,
         "raw_text": raw_text,
     }), 200
-
    
-
-
 @app.route("/health", methods=["GET"])
 def health_check():
     """

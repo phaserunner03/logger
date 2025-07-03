@@ -1,16 +1,17 @@
 package configs
 
 import (
+	"github.com/joho/godotenv"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"time"
-	"github.com/joho/godotenv"
-	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
 	Services struct {
-		Name []string `yaml:"name"`
+		Name     []string `yaml:"name"`
+		Severity []string `yaml:"severity"`
 	} `yaml:"service"`
 
 	Env struct {
@@ -21,6 +22,12 @@ type Config struct {
 		TopicID           string
 		SubID             string
 		GithubToken       string
+		RepoOwner         string
+		RepoName          string
+		BaseBranch        string
+		CodeBasePath      string
+		LogFetchType      string
+		LogFilePath       string
 	}
 }
 
@@ -63,7 +70,13 @@ func LoadConfig() (*Config, error) {
 	config.Env.BigQueryTableID = os.Getenv("BIGQUERY_TABLE_ID")
 	config.Env.TopicID = os.Getenv("TOPIC_ID")
 	config.Env.SubID = os.Getenv("SUB_ID")
-	config.Env.GithubToken=os.Getenv("GITHUB_TOKEN")
+	config.Env.GithubToken = os.Getenv("GITHUB_TOKEN")
+	config.Env.RepoOwner = os.Getenv("REPO_OWNER")
+	config.Env.RepoName = os.Getenv("REPO_NAME")
+	config.Env.BaseBranch = os.Getenv("BASE_BRANCH")
+	config.Env.CodeBasePath = os.Getenv("CODE_BASE_PATH")
+	config.Env.LogFetchType = os.Getenv("LOG_FETCH_TYPE")
+	config.Env.LogFilePath = os.Getenv("LOG_FILE_PATH")
 
 	return &config, nil
 }
