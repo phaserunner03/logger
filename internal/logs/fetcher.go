@@ -167,17 +167,13 @@ func parseLogEntry(raw string) (*configs.BQLogRow, error) {
 		parsed[key[1:len(key)-1]] = finalValue // remove quotes from key
 	}
 
-	// Optional: Convert back to JSON string for JsonPayload
-	jsonLike, err := json.Marshal(parsed)
-	if err != nil {
-		return nil, fmt.Errorf("failed to re-marshal log: %v", err)
-	}
 
-	// Extract values
+
+	
 	return &configs.BQLogRow{
 		Timestamp:   parseTimestamp(parsed["timestamp"]),
 		Severity:    fmt.Sprintf("%v", parsed["level"]),
-		JsonPayload: string(jsonLike),
+		JsonPayload: fmt.Sprintf("%v", parsed["message"]),
 		ServiceName: fmt.Sprintf("%v", parsed["function"]),
 	}, nil
 }

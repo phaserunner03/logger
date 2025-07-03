@@ -27,14 +27,16 @@ func processLogsFromFile(ctx context.Context, filePath string) error {
 		log.Println("No log entries to process")
 		return nil
 	}
-		
-	log.Println("📋 Showing sample logs (max 10):")
-	for i := 0; i < len(entries) && i < 10; i++ {
-		entry := entries[i]
-		log.Printf("[%d] Timestamp: %s | Function: %s | Message: %s\n",
-			i+1, entry.Timestamp.Format("2006-01-02 15:04:05"), entry.ServiceName, entry.JsonPayload)
-	}
 
+	log.Println("📋 Showing sample logs (max 10):")
+	for i := 0; i < len(entries); i++ {
+		entry := entries[i]
+		if entry.Severity == "[error]" {
+			log.Printf("[%d]   Message: %s\n",
+				i+1, entry.JsonPayload)
+		}
+
+	}
 
 	fmt.Printf("successfully processed log entries from file")
 	return nil
