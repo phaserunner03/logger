@@ -88,7 +88,7 @@ func FetchLogsFromFile(ctx context.Context, filePath string) ([]*configs.BQLogRo
 		line := scanner.Text()
 		
 		if logStartPattern.MatchString(line) {
-			// Flush previous entry
+			
 			if currentLog.Len() > 0 {
 				entry, err := parseLogEntry(currentLog.String())
 				if err == nil && entry != nil {
@@ -166,7 +166,7 @@ func parseLogEntry(raw string) (*configs.BQLogRow, error) {
 
 		parsed[key[1:len(key)-1]] = finalValue // remove quotes from key
 	}
-
+	// fmt.Printf("Parsed log entry: %v\n", parsed)
 
 
 	
@@ -175,6 +175,8 @@ func parseLogEntry(raw string) (*configs.BQLogRow, error) {
 		Severity:    fmt.Sprintf("%v", parsed["level"]),
 		JsonPayload: fmt.Sprintf("%v", parsed["message"]),
 		ServiceName: fmt.Sprintf("%v", parsed["function"]),
+		TextPayload: fmt.Sprintf("%v", parsed["stack"]),
+		
 	}, nil
 }
 

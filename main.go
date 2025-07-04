@@ -32,8 +32,8 @@ func processLogsFromFile(ctx context.Context, filePath string) error {
 	for i := 0; i < len(entries); i++ {
 		entry := entries[i]
 		if entry.Severity == "[error]" {
-			log.Printf("[%d]   Message: %s\n",
-				i+1, entry.JsonPayload)
+			log.Printf("[%d]   Message: %s | Stack: %s\n",
+				i+1, entry.JsonPayload, entry.TextPayload)
 		}
 
 	}
