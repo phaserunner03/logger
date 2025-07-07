@@ -1,5 +1,4 @@
 import os
-import re
 from typing import List, Dict, Any
 
 from langchain.docstore.document import Document

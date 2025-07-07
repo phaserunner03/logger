@@ -1,4 +1,3 @@
-import json
 from retriever.rag_chain import rag_chain
 
 def analyze_logs(log=None):

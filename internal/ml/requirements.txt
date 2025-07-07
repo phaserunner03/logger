@@ -1,7 +1,25 @@
+# Flask and HTTP server
 flask
+
+# LangChain core + providers
 langchain
 langchain-google-genai
+langchain-anthropic
+langchain-openai
 langchain-chroma
+
+# Google Cloud SDKs
 google-cloud-bigquery
 google-cloud-aiplatform
+google-cloud-logging
+
+# Vector DB
+chromadb
+
+# Environment variable management
 python-dotenv
+
+# Other utilities
+requests
+tqdm
+pydantic
