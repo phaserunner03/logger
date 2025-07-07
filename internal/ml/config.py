@@ -1,16 +1,14 @@
-import os 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 CLONE_REPO=True
 REPO_URL= "https://github.com/Manav7603/buggy_app"
-PROJECT_ID = "logger-462111"
-REGION = "us-central1"
+PROJECT_ID="logger-462111"
+REGION = "us-east5"
 BATCH_SIZE = 5
-CODEBASE_PATH = os.getenv("CODE_BASE_PATH","./codebase")
+CODEBASE_PATH ="/Users/bhavya.shah/Documents/buggy_app_clone"
 EMBEDDING_MODEL = "models/embedding-001"
-LLM_MODEL = "gemini-2.0-flash"
+GEMINI_LLM = "gemini-2.0-flash"
 PERSISTENT_VECTORSTORE_PATH = "./internal/data"
-VECTOR_SEARCH_THRESHOLD = 0.6  # e.g. 0.7
-TOP_K = 10  # e.g. 10
+VECTOR_SEARCH_THRESHOLD = 0.1
+TOP_K = 10  
+CLAUDE_LLM="claude-opus-4@20250514"
+OPENAI_LLM="gpt-4@vertex"
+GCP_CREDENTIALS="/Users/bhavya.shah/Documents/Go/logger/key.json"

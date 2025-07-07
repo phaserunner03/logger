@@ -1,5 +1,4 @@
 import os
-import re
 from typing import List, Dict, Any
 
 from langchain.docstore.document import Document
@@ -68,7 +67,7 @@ class EnhancementLoop:
     def __init__(
         self,
         embedding_model: Embeddings,
-        llm: ChatGoogleGenerativeAI,
+        llm,
         persist_dir: str = PERSISTENT_VECTORSTORE_PATH,
     ):
         os.makedirs(persist_dir, exist_ok=True)
@@ -91,7 +90,6 @@ class EnhancementLoop:
         self.llm = llm
 
     def run(self, query: str) -> Dict[str, Any]:
-        # 1) embed the query
         q_vec = self.embedding_model.embed_query(query)
 
         # 2) search using retrieval API that returns scores
@@ -107,6 +105,7 @@ class EnhancementLoop:
 
         # 4) build and send prompt
         prompt = build_prompt(query, [d for d, _ in filtered])
+        
         resp = self.llm.invoke(prompt)
         text = resp.content if hasattr(resp, 'content') else getattr(resp, 'result', str(resp))
         return text

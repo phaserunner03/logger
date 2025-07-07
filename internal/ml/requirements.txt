@@ -5,3 +5,11 @@ langchain-chroma
 google-cloud-bigquery
 google-cloud-aiplatform
 python-dotenv
+langchain-openai
+langchain-google-vertexai
+protobuf<=3.21.0
+google-cloud-aiplatform
+anthropic
+google-auth
+google-auth-oauthlib
+google-cloud-aiplatform

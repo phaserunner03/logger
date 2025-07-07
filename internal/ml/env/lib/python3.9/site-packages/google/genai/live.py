@@ -79,6 +79,7 @@ _FUNCTION_RESPONSE_REQUIRES_ID = (
     ' response of a ToolCall.FunctionalCalls in Google AI.'
 )
 
+
 class AsyncSession:
   """[Preview] AsyncSession."""
 
@@ -211,15 +212,17 @@ class AsyncSession:
           print(msg.text)
     ```
     """
-    client_content = t.t_client_content(turns, turn_complete)
+    client_content = t.t_client_content(turns, turn_complete).model_dump(
+        mode='json', exclude_none=True
+    )
 
     if self._api_client.vertexai:
       client_content_dict = live_converters._LiveClientContent_to_vertex(
-          api_client=self._api_client, from_object=client_content
+          from_object=client_content
       )
     else:
       client_content_dict = live_converters._LiveClientContent_to_mldev(
-          api_client=self._api_client, from_object=client_content
+          from_object=client_content
       )
 
     await self._ws.send(json.dumps({'client_content': client_content_dict}))
@@ -313,13 +316,13 @@ class AsyncSession:
     if self._api_client.vertexai:
       realtime_input_dict = (
           live_converters._LiveSendRealtimeInputParameters_to_vertex(
-              api_client=self._api_client, from_object=realtime_input
+              from_object=realtime_input
           )
       )
     else:
       realtime_input_dict = (
           live_converters._LiveSendRealtimeInputParameters_to_mldev(
-              api_client=self._api_client, from_object=realtime_input
+              from_object=realtime_input
           )
       )
     realtime_input_dict = _common.convert_to_dict(realtime_input_dict)
@@ -399,11 +402,11 @@ class AsyncSession:
     tool_response = t.t_tool_response(function_responses)
     if self._api_client.vertexai:
       tool_response_dict = live_converters._LiveClientToolResponse_to_vertex(
-          api_client=self._api_client, from_object=tool_response
+          from_object=tool_response
       )
     else:
       tool_response_dict = live_converters._LiveClientToolResponse_to_mldev(
-          api_client=self._api_client, from_object=tool_response
+          from_object=tool_response
       )
       for response in tool_response_dict.get('functionResponses', []):
         if response.get('id') is None:
@@ -527,13 +530,9 @@ class AsyncSession:
       response = {}
 
     if self._api_client.vertexai:
-      response_dict = live_converters._LiveServerMessage_from_vertex(
-          self._api_client, response
-      )
+      response_dict = live_converters._LiveServerMessage_from_vertex(response)
     else:
-      response_dict = live_converters._LiveServerMessage_from_mldev(
-          self._api_client, response
-      )
+      response_dict = live_converters._LiveServerMessage_from_mldev(response)
 
     return types.LiveServerMessage._from_response(
         response=response_dict, kwargs=parameter_model.model_dump()
@@ -647,13 +646,13 @@ class AsyncSession:
           content_input_parts.append(item)
       if self._api_client.vertexai:
         contents = [
-            _Content_to_vertex(self._api_client, item, to_object)
-            for item in t.t_contents(self._api_client, content_input_parts)
+            _Content_to_vertex(item, to_object)
+            for item in t.t_contents(content_input_parts)
         ]
       else:
         contents = [
-            _Content_to_mldev(self._api_client, item, to_object)
-            for item in t.t_contents(self._api_client, content_input_parts)
+            _Content_to_mldev(item, to_object)
+            for item in t.t_contents(content_input_parts)
         ]
 
       content_dict_list: list[types.ContentDict] = []
@@ -1038,19 +1037,18 @@ class AsyncLive(_api_module.BaseModule):
       if headers is None:
         headers = {}
       _mcp_utils.set_mcp_usage_header(headers)
-    try:
-      async with ws_connect(uri, additional_headers=headers) as ws:
-        await ws.send(request)
-        logger.info(await ws.recv(decode=False))
 
-        yield AsyncSession(api_client=self._api_client, websocket=ws)
-    except TypeError:
-      # Try with the older websockets API
-      async with ws_connect(uri, extra_headers=headers) as ws:
-        await ws.send(request)
+    async with ws_connect(
+        uri, additional_headers=headers, **self._api_client._websocket_ssl_ctx
+    ) as ws:
+      await ws.send(request)
+      try:
+        # websockets 14.0+
+        logger.info(await ws.recv(decode=False))
+      except TypeError:
         logger.info(await ws.recv())
 
-        yield AsyncSession(api_client=self._api_client, websocket=ws)
+      yield AsyncSession(api_client=self._api_client, websocket=ws)
 
 
 async def _t_live_connect_config(
@@ -1063,7 +1061,7 @@ async def _t_live_connect_config(
   elif isinstance(config, dict):
     if getv(config, ['system_instruction']) is not None:
       converted_system_instruction = t.t_content(
-          api_client, getv(config, ['system_instruction'])
+          getv(config, ['system_instruction'])
       )
     else:
       converted_system_instruction = None
@@ -1073,9 +1071,7 @@ async def _t_live_connect_config(
     if config.system_instruction is None:
       system_instruction = None
     else:
-      system_instruction = t.t_content(
-          api_client, getv(config, ['system_instruction'])
-      )
+      system_instruction = t.t_content(getv(config, ['system_instruction']))
     parameter_model = config
     parameter_model.system_instruction = system_instruction
 
